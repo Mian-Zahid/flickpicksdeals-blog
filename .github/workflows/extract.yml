@@ -1,0 +1,22 @@
+name: Extract blog source
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip blog files
+        run: |
+          unzip -o flickpicksdeals-blog-ready.zip
+          rm -f flickpicksdeals-blog-ready.zip
+          rm -f .github/workflows/extract.yml
+      - name: Commit extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Extract blog source" || echo "nothing to commit"
+          git push
