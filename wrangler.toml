@@ -1,0 +1,12 @@
+# flickpicksdeals.com — Cloudflare Workers Static Assets
+# -----------------------------------------------------------
+# The Worker "flickpicksdeals" already exists and has flickpicksdeals.com
+# (+ www) attached as a custom domain. `wrangler deploy` updates it in
+# place and KEEPS the custom domain. Do NOT add [[routes]] here.
+# Deploy with:  npx wrangler deploy
+# (or via the GitHub Actions workflow in .github/workflows/deploy.yml)
+name = "flickpicksdeals"
+compatibility_date = "2025-11-01"
+
+[assets]
+directory = "./site"
