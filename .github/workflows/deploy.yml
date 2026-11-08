@@ -1,0 +1,48 @@
+# Deploy flickpicksdeals.com blog to Cloudflare Workers (Static Assets)
+# ---------------------------------------------------------------------------
+# Repo layout this workflow expects:
+#   wrangler.toml
+#   .github/workflows/deploy.yml   (this file)
+#   site/                          (built static site = copy of blog-emerald/)
+#
+# Secrets needed (repo Settings -> Secrets and variables -> Actions):
+#   CLOUDFLARE_API_TOKEN   - FRESH token. NEVER reuse the Nov-4 token
+#                             (it was exposed in chat; revoke it first).
+#   CLOUDFLARE_ACCOUNT_ID  - Cloudflare account ID (dashboard sidebar).
+#
+# Triggers: every push to main, or manual "Run workflow".
+# What it does NOT do: it does NOT build the site. The build (hunt -> Howl
+# links -> build_emerald.py) still runs locally; the built output is copied
+# into site/ and pushed. The push is what triggers this deploy.
+name: Deploy blog to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Sanity-check + clean junk from assets
+        run: |
+          test -f site/index.html || (echo "site/index.html missing" && exit 1)
+          test -f site/sitemap.xml || (echo "site/sitemap.xml missing" && exit 1)
+          find site -name "*.zip" -delete
+          find site -name ".DS_Store" -delete
+          echo "assets size:"; du -sh site
+          echo "pages:"; find site -name "index.html" | wc -l
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
