@@ -1,0 +1,24 @@
+name: Extract site build
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace site with new build
+        run: |
+          rm -rf site
+          mkdir site
+          unzip -o site-emerald-nov09.zip -d site
+          rm -f site-emerald-nov09.zip
+          rm -f .github/workflows/extract.yml
+      - name: Commit new site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Site fix deploy: HP 22 removed, About/Contact/Disclosure + 3 guides added, Nov-9 prices" || echo "nothing to commit"
+          git push
