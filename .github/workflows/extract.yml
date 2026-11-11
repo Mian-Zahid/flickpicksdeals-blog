@@ -1,0 +1,31 @@
+name: Extract site build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Unzip site build into site/
+        run: |
+          ZIP=$(ls flickpicksdeals-blog-*.zip | head -n 1)
+          test -n "$ZIP" || (echo "no flickpicksdeals-blog-*.zip found in repo root" && exit 1)
+          rm -rf site
+          mkdir -p site
+          unzip -o "$ZIP" -d site
+          rm "$ZIP"
+
+      - name: Commit extracted site
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add -A
+          git commit -m "Extract site build" || echo "nothing to commit"
+          git push
